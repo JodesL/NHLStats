@@ -329,6 +329,7 @@ def preprocessing_cross_valid(year_start, year_end, nb_folds):
     for j in range(year_start, year_end+1):
         p = PreProcessing(j)
         data, data_test = p.valid_builder(nb_folds, j == year_start)
+        p.export_elo(j)
         for k in range(nb_folds):
             data_final[k].extend(data[k])
             data_test_final[k].extend(data_test[k])
@@ -341,7 +342,7 @@ def preprocessing_cross_valid(year_start, year_end, nb_folds):
     return normalized_data, normalized_test_data
 
 
-def preprocessing_final(year_start, year_end, file_name):
+def preprocessing_final(year_start, year_end, file_name=None, export=True):
     # Preprocesses all data
     # Eg: preprocessing_final(2013, 'test')
     data_final = []
@@ -355,10 +356,14 @@ def preprocessing_final(year_start, year_end, file_name):
         print('Preprocessing for year ' + str(i) + '-' + str(i+1) + ' completed')
 
     normalized_data, normalized_test_data = normalize(data_final, [])
-    export_data(file_name, normalized_data)
+
+    if export:
+        export_data(file_name, normalized_data)
+
+    return normalized_data
 
 if __name__ == "__main__":
     pass
-    preprocessing_final(2012, 2014, 't4')
+    # preprocessing_final(2012, 2014, 't5')
 
-    # preprocessing_cross_valid(2014, 2014, 10)
+    preprocessing_cross_valid(2012, 2014, 10)

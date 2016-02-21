@@ -179,17 +179,31 @@ def trainingSizeTest(net, iterations, learning_rate, grad_decay=0.9, epsilon=0.0
     plt.legend()
 
     return
+def simple_test(net, iterations, learning_rate, grad_decay, epsilon, adadelta):
+
+    data = pp.preprocessing_final(2012, 2014)
+    n = len(data)-100
+    x_train = data[:n, 1:]
+    y_train = data[:n, 0]
+    x_test = data[n:, 1:]
+    y_test = data[n:, 0]
+    min_error = net.test(x_train, y_train, iterations, learning_rate, grad_decay, epsilon, adadelta, X_test=x_test, y_test=y_test)
+
+
+
 
 if __name__ == '__main__':
     #random.seed(12)
     #np.random.seed(12)
 
-    net = nn.NeuralNetwork(34, 34, 1, nb_hidden_layers=4, weight_decay=18.0)
+    net = nn.NeuralNetwork(34, 100, 1, nb_hidden_layers=1, weight_decay=0.0)
 
     #trainingSizeTest(net, 500, 0.008)
 
     #net2 = net.clone()
-    testOneRun(net, 5, 4000, learning_rate=0.0075, adadelta=False)
+    testOneRun(net, 5, 300, learning_rate=0.0075, adadelta=False)
+    net.reset()
+    simple_test(net, 500, 0.0075, 0.9, 0.000001, False)
 
     #testOneRun(net2, 5, 500, adadelta=True)
 
@@ -197,9 +211,11 @@ if __name__ == '__main__':
     #hyperoptimization(20)
 
     net.graphCosts()
-    net.graphWeights(False)
+    # net.graphWeights(False)
     #net2.graphCosts(1)
     #net2.graphWeights()
     plt.show()
+
+
 
 
