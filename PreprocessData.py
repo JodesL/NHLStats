@@ -20,22 +20,34 @@ class PreProcessing:
     def __init__(self, year):
 
         self.year = year
-
-        ###imports team legend
         self.team_legend = []
+        self.team_index = []
+        self.inputs_raw = []
+        self.training_games = []
+        self.inputs_diff = []
+
+
+        self.import_team_legend()
+        self.import_season_data()
+        self.format_season_data()
+        self.create_game_list()
+        self.create_list_diff()
+
+    def import_team_legend(self):
+        ###imports team legend
         with open('Team_legend.csv', 'r') as csvfile:
             reader = csv.reader(csvfile)
             for row in reader:
                 self.team_legend.append([entry for entry in row])
         csvfile.close()
 
-        self.team_index = []
         for team in self.team_legend:
             self.team_index.append(team[0])
 
+
+    def import_season_data(self):
         ###imports list of season games
-        self.inputs_raw = []
-        with open('team_game_season_' + str(year) + '_' + str(year+1) + '.csv', 'r') as csvfile:
+        with open('team_game_season_' + str(self.year) + '_' + str(self.year+1) + '.csv', 'r') as csvfile:
             next(csvfile)
             reader = csv.reader(csvfile)
             for row in reader:
@@ -44,7 +56,7 @@ class PreProcessing:
 
         ###imports advanced stats of season games
         self.advanced_stats = []
-        with open('advanced_team_stats_' + str(year) + '_' + str(year+1) + '.csv', 'r') as csvfile:
+        with open('advanced_team_stats_' + str(self.year) + '_' + str(self.year+1) + '.csv', 'r') as csvfile:
             next(csvfile)
             reader = csv.reader(csvfile)
             for row in reader:
@@ -63,7 +75,7 @@ class PreProcessing:
                 game.extend([0]*(max_length-len(game)))
                 print(game)
 
-
+    def format_season_data(self):
         ###replace team name by abbreviation, add home game indicator
         for game in self.inputs_raw:
             game[0] = self.team_legend[self.team_index.index(game[0])][1]
@@ -127,15 +139,15 @@ class PreProcessing:
             #33 - USAT Behind
             #34 - USAT Close
 
-
+    def create_game_list(self):
         ###create training_game subset from input games
-        self.training_games = []
+
         for game in self.inputs_raw:
             if game[20] == 'home':
                 self.training_games.append(game[0:4])
 
+    def create_list_diff(self):
         ## create list of differences
-        self.inputs_diff = []
         for game in self.inputs_raw:
             self.inputs_diff.append([])
             self.inputs_diff[-1].extend(game[0:2]) #Team 1, date,
@@ -148,6 +160,7 @@ class PreProcessing:
             self.inputs_diff[-1].append(float(game[17])-float(game[18])) #Face off wins - face off losts
             self.inputs_diff[-1].extend(game[23:28]) #SATs (corsi)
             self.inputs_diff[-1].extend(game[30:35]) #USATs (fenwick)
+
 
     def delta_elo(self, k_factor, elo_1, elo_2, score_diff, margin_victory=True):
         #calculates the change in elo for team with elo_1
@@ -239,44 +252,7 @@ class PreProcessing:
 
         nb_skipped = 0 # is it still necessary to skip games?
         data = data[nb_skipped:]
-        #data structure:
-            # 0 - win indicator
-            # 1:30 - team home
-            # 31:60 - team away
-            # 61 - Wins (team home)
-            # 62 - Losses
-            # 63 - Overtime Losses
-            # 64 - Points
-            # 65 - Goals For
-            # 66 - Goals Against
-            # 67 - Shots For
-            # 68 - Shots Againsts
-            # 69 - PPG
-            # 70 - PP opp
-            # 71 - PP%
-            # 72 - TS
-            # 73 - PPGA
-            # 74 - PK%
-            # 75 - FOW
-            # 76 - FOL
-            # 77 - FOW%
-            # 77 - Wins (team away)
-            # 78 - Losses
-            # 79 - Overtime Losses
-            # 80 - Points
-            # 81 - Goals For
-            # 82 - Goals Against
-            # 83 - Shots For
-            # 84 - Shots Againsts
-            # 85 - PPG
-            # 86 - PP opp
-            # 87 - PP%
-            # 88 - TS
-            # 89 - PPGA
-            # 90 - PK%
-            # 91 - FOW
-            # 92 - FOL
-            # 93 - FOW%
+
         return data
 
     def export_elo(self, year, soft_reset=True):
